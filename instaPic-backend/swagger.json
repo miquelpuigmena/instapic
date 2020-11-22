@@ -1,0 +1,371 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "Swagger instaPic",
+      "version": "1.0.0",
+      "title": "Insta Pic",
+      "contact": {
+        "email": "miquelpuigmena@gmail.com"
+      }
+    },
+    "host": "localhost:3000",
+    "basePath": "/v1",
+
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/register": {
+        "post": {
+          "tags": [
+            "User"
+          ],
+          "summary": "Persist user in db",
+          "description": "Accepts a username and registers it in db. In exchange it provides an identification cookie to the client.",
+          "operationId": "createUser",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "name",
+              "description": "Username identifying user",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "reap"
+                    }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+                "message": "User 'reap' registered",
+                "description": "The session ID is returned in a cookie named `connect.sid`. You need to include this cookie when logging in.",
+                "headers": {
+                    "Set-Cookie": {
+                        "schema": {
+                            "type": "string",
+                            "example": "connect.sid=s%3AMhN68yf89hkM-1vNJWaLrbfI8fkk9tvH.XD2AhLu2mzOyi0JHQemDEXfy0DQ0Nqh%2BTMl%2BRySuVTs; Path=/; Expires=Fri, 20 Nov 2020 15:24:50 GMT; HttpOnly"
+                        }
+                    }
+                }
+            },
+            "400": {
+              "message": "Malformed username"
+            },
+            "500": {
+                "message": "Internal error"
+            }
+          }
+        }
+      },
+      "/login": {
+        "post": {
+            "tags": [
+              "User"
+            ],
+            "summary": "Logs user to app",
+            "description": "Logs user by linking the `user` parameter to specified `cookie` in request.",
+            "operationId": "loginUser",
+            "consumes": [
+              "application/json"
+            ],
+            "produces": [
+              "application/json"
+            ],
+            "parameters": [
+              {
+                "in": "body",
+                "name": "name",
+                "description": "Username identifying user",
+                "required": true,
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                      "name": {
+                          "type": "string"
+                      }
+                  }
+                }
+              },
+              {
+                  "in": "cookie",
+                  "name": "connect.sid",
+                  "description": "Active cookie that will be linked to user",
+                  "schema": {
+                      "type": "string",
+                      "example": "s%3Apegx9JJdiVGUmPBghXjj6fp_HFp5MI_s.HMvMqdWIW9w5QoO8Rx6CHQ%2FVVxHL%2FlZQkVJu1vkmQDQ;"
+                  }
+              },
+              {
+                  "in": "cookie",
+                  "name": "Path",
+                  "description": "No info",
+                  "schema": {
+                      "type": "string",
+                      "example": "/;"
+                  }
+              },
+              {
+                  "in": "cookie",
+                  "name": "Expires",
+                  "description": "Expire date of cookie",
+                  "schema": {
+                      "type": "string",
+                      "example": "Fri, 20 Nov 2020 15:25:16 GMT;"
+                  }
+              }
+            ],
+            "responses": {
+              "200": {
+                  "message": "Login of 'reap' successful"
+              },
+              "400": {
+                "message": "Malformed username"
+              },
+              "500": {
+                  "message": "Internal error"
+              }
+            }
+          }
+      },
+      "/restricted": {
+        "get": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Logs out current logged in user session",
+          "description": "",
+          "operationId": "logoutUser",
+          "produces": [
+            "application/xml",
+            "application/json"
+          ],
+          "parameters": [],
+          "responses": {
+            "default": {
+              "description": "successful operation"
+            }
+          }
+        }
+      },
+      "/upload": {
+        "get": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Get user by user name",
+          "description": "",
+          "operationId": "getUserByName",
+          "produces": [
+            "application/xml",
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "username",
+              "in": "path",
+              "description": "The name that needs to be fetched. Use user1 for testing. ",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "400": {
+              "description": "Invalid username supplied"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Updated user",
+          "description": "This can only be done by the logged in user.",
+          "operationId": "updateUser",
+          "produces": [
+            "application/xml",
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "username",
+              "in": "path",
+              "description": "name that need to be updated",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Updated user object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Invalid user supplied"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "user"
+          ],
+          "summary": "Delete user",
+          "description": "This can only be done by the logged in user.",
+          "operationId": "deleteUser",
+          "produces": [
+            "application/xml",
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "name": "username",
+              "in": "path",
+              "description": "The name that needs to be deleted",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "400": {
+              "description": "Invalid username supplied"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        }
+      }
+    },
+
+    "definitions": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "petId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shipDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "Order Status",
+            "enum": [
+              "placed",
+              "approved",
+              "delivered"
+            ]
+          },
+          "complete": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "xml": {
+          "name": "Order"
+        }
+      },
+
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "description": {
+              "type": "string"
+          },
+          "img_path": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string"
+          },
+          "sess": {
+            "type": "json"
+          },
+          "expire": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "connect.sid"
+            }
+        }
+    }
+  }
