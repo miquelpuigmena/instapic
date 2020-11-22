@@ -1,5 +1,8 @@
 import express from 'express';
-import multer from 'multer';
+import fileType from 'file-type';
+import fs from 'fs';
+import Busboy from 'busboy';
+import swaggerUi from 'swagger-ui-express';
 import cookieparser from 'cookie-parser';
 import session from 'express-session';
 import connectpgsimple from 'connect-pg-simple';
@@ -7,171 +10,251 @@ import { createUser, createPost, getUserBySessionId, loginUser, getDbPool } from
 import util from 'util';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import {log} from './logger.js';
+import {finished} from 'stream';
 
+class APIError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.status = status;
+    }
+}
+
+// Util constants
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-const app = express();
-// App settings
 const port = process.env.PORT || 3000;
-app.set('port', port)
 
-// MIDDLEWARE
-app.use(express.json())
-app.use(cookieparser());
+// db C
+const dbSessionTableName = process.env.DBSESSION;
+const dbSessSecret = process.env.SESSION_SECRET;
 
-var pgSession = connectpgsimple(session)
-app.use(session({
+// Swagger doc
+const rawdata = fs.readFileSync('./swagger.json');
+let swaggerDoc = JSON.parse(rawdata);
+
+// max size post
+const MAX_SIZE = 1000000; /* 1MB */ 
+// App & Router
+const app = express();
+app.set('port', port);
+const router = express.Router();
+
+// Init MWs
+const jsonMW = express.json();
+const cookieparserMW = cookieparser();
+var pgSession = connectpgsimple(session);
+const sessionMW = session({
     store: new pgSession({
-      pool : getDbPool(),
-      tableName : 'session'
+        pool: getDbPool(),
+        tableName: dbSessionTableName
     }),
-    secret: process.env.SESSION_SECRET,
+    secret: dbSessSecret,
     // depracated messages
     resave: false,
     // cookie's params
     cookie: { maxAge: 30 * 60 * 1000 } // 30 min
-  }));
-
-// Auth MW
-const authMW = async (req, res, next) => {
-    let sessId = req.sessionID;
-    try {
-        const userId = await getUserBySessionId(sessId);
-        req.user = userId
-    } catch(err) {
-        console.log(`Error: ${err}`);
-        req.user = undefined
-    }
-    next(); 
-}
-app.use(authMW);
-
-// Custom mylogger MW
+});
 const myloggerMW = (req, res, next) => {
-    console.debug(`Incoming Request sid=${req.sessionID}, body=${util.inspect(req.body)}, user=${req.user}`);
+    log.info(`Incoming Request sid=${req.sessionID}, body=${util.inspect(req.body)}, user=${req.user}`);
     next();
 }
-app.use(myloggerMW);
-
-// ROUTES
-app.post('/register', async (req, res) => {
-    const username = req.body.name;
-    if(!isUserValid(username)) {
-        return res.status(401).json({message: `Wrong username`});
-    }
+const ErrorHandler = (err, req, res, next) => {
+    log.error(`Error: ${err.message}\n ${err.stack}`);
+    if (!err.status) res.status(500);
+    else res.writeHead(err.status, { 'Connection': 'close', 'Content-type': 'application/json'});
+    return res.end(JSON.stringify({ message: err.message }));
+}
+const IsAuthMW = async (req, res, next) => {
     try {
-        const userId = await createUser(username)
-        console.log(`New User created with name='${username}'`);
-        return res.status(200).json({message: `User '${username}' registered`});
+        let sessId = req.sessionID;
+        log.info(`IsAuth function sess_id=${sessId}`);
+        let userId = await getUserBySessionId(sessId);
+        if (userId == 0) {
+            // Cookie exists but not logged in
+            throw new Error();
+        }
+        req.user = userId;
     } catch (err) {
-        console.log(`Error: ${err}`);
-        return res.status(500).json({message: `Server failed to process username`});
+        return next(new APIError(`Unauthorized user`, 401));
     }
-})
-
-app.post('/login', async (req, res) => {
-    let sid = req.sessionID;
-    let username = req.body.name;
-    console.log(`API login sid=${sid}, name=${username}`);
-    if(!isUserValid(username)) {
-        return res.status(401).json({message: `Wrong username`});
-    } else {
-        try {
-            const result = await loginUser(username, sid)
-            console.log(`Login of '${username}' successful`);
-            return res.status(200).json({message: `Login of '${username}' successful`});
-        } catch (err) {
-            console.log(`Error: ${err}`);
-            return res.status(500).json({message: `Server failed to process username`});
-        }  
-    }
-});
-
-app.get('/restricted', async (req, res) => {
-    const userId = req.user;
-    console.log(`API restricted user_id=${userId}`);
-    if (userId == undefined || userId == 0) {
-        return res.status(401).json({message: `Unauthorized access`});
-    }
-    return res.status(200).json({message: `OK`});
-});
-
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, __dirname + '/uploads');
-    },
-    filename: function (req, file, cb) {
-        // pseudo-random
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1]);
-    }
-  });
-
-var maxSize = 5 * 1024 * 1024; // 5MB
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png') {
-        cb(null, true);
-    } else {
-        cb(null, false);
-    }
-};
-
-let upload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: maxSize } });
-
-
-app.post('/upload', upload.single('image'), async (req, res) => {
-    const userId = req.user;
-    if (userId == undefined || userId == 0) {
-        return res.status(401).json({message:`Unauthorized access`});
-    }
-
-    // let errMsg = await upload(req, res, function(err) {
-    //     // req.file contains information of uploaded file
-    //     // req.body contains information of text fields, if there were any
-    //     console.log(`req in upload ${util.inspect(req.file)}`);
-
-    //     let errMsg = undefined;
-    //     if (req.fileValidationError) {
-    //         console.log(`Error: ${req.fileValidationError}`);
-    //         errMsg = `File format incorrect`;
-    //     }
-    //     else if (!req.file) {
-    //         console.log(`Error: Empty file`);
-    //         errMsg = `No file found`;
-    //     }
-    //     else if (err instanceof multer.MulterError) {
-    //         console.log(`Error: ${err}`);
-    //         errMsg = `Unable to process file`;
-    //     }
-    //     else if (err) {
-    //         console.log(`Error: ${err}`);
-    //         errMsg = `Unable to process file`;
-    //     }
-    //     return errMsg
-    // });
-    // if (errMsg != undefined) {
-    //     return res.status(400).json({message: errMsg});
-    // }
-    const desc = req.body.description;
-    console.log(`req ${util.inspect(req)}`);
-    const imagePath = req.file.filename;
-    console.log(`API pic user_id=${userId}, desc=${desc}, img=${imagePath}`);
-    try {
-        let result = await createPost(userId, desc, imagePath);
-        console.log(`Pic post successful`);
-        return res.status(200).json({message: `OK`}); 
-    } catch (err) {
-        console.log(`Error: ${err}`);
-        return res.status(500).json({messgae: `Server failed to post picture`});
-    }
-});
-
+    next();
+}
 // Utils
 const isUserValid = (name) => {
     return name != undefined && name.length <= 30 && name.length > 0;
 }
+// Routes
+const registerPost = async (req, res, next) => {
+    const username = req.body.name;
+    if (!isUserValid(username)) {
+        return next(new APIError(`Malformed username`, 400));
+    }
+    try {
+        const userId = await createUser(username);
+        log.info(`New User created with name='${username}'`);
+        return res.status(200).json({ message: `User '${username}' registered` });
+    } catch (err) {
+        log.error(`Error: ${err}`);
+        next(new APIError(`Internal error`, 500));
+    }
+}
+const loginPost = async (req, res, next) => {
+    let sid = req.sessionID;
+    let username = req.body.name;
+    log.info(`API login sid=${sid}, name=${username}`);
+    if (!isUserValid(username)) {
+        return next(new APIError(`Malformed username`, 400));
+    } else {
+        try {
+            const result = await loginUser(username, sid);
+            log.info(`Login of '${username}' successful`);
+            return res.status(200).json({ message: `Login of '${username}' successful` });
+        } catch (err) {
+            log.error(`Error: ${err}`);
+            next(new APIError(`Internal error`, 500));
+        }
+    }
+}
+const restrictedGet = async (req, res, next) => {
+    return res.status(200).json({ message: `OK` });
+}
 
+const isMagicNumbersValid = async (b) => {
+    // first chunk of 64KB including mime type
+    const type = await fileType.fromBuffer(b);
+    log.info(`Type file is ${util.inspect(type)}`);
+    return type && (type.ext === 'jpg' || type.ext === 'png');
+}
+
+const getRandomFileStream = (fieldname, mimetype) => {
+    var saveTo = (fieldname, mimetype) => {
+        // pseudo-random
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        return fieldname + '-' + uniqueSuffix + '.' + mimetype.split('/')[1];
+    }
+    let filepath = __dirname + '/uploads/' + saveTo(fieldname, mimetype);
+    return fs.createWriteStream(filepath);
+}
+
+const processFile = (file, wStream) => {
+    return new Promise((res, rej) => {
+        let cntChunks = 0;
+
+        file.on('data', async data => {
+            // On data chunk received
+            //      check magic numbers if it's chunk0
+            //      count chunks if other
+            if (cntChunks == 0) {
+                // First chunk
+                if (await isMagicNumbersValid(data)) {
+                    log.info(`Magic Numbers are either jpg or png`);
+                } else {
+                    // Invalid post, magic numbers not jpg or png
+                    wStream.emit('error', new APIError(`Malformed file`, 400));
+                    wStream.destroy();
+                    file.resume();
+                }
+            }
+            cntChunks++;
+        });
+        wStream.on('error', err => {
+            rej(err);
+        });
+        wStream.on('finish', () => {
+            res();
+        });
+    });
+}
+
+const uploadPost = async (req, res, next) => {
+    var busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: MAX_SIZE } });
+    let newpost = new Map();
+    let hasErr = false;
+    busboy.on('limit', ()  =>  {
+        if (!hasErr) {
+            // File exceeded allowed size
+            busboy.emit('error', new APIError(`File exceeds max size ${MAX_SIZE}`, 400));
+            hasErr = true;
+        }
+    });
+
+    busboy.on('field', (fieldname, val) => {
+        if (!hasErr) {
+            // On field description received, store description; else trigger error
+            if (fieldname != 'description') {
+                log.error(`Field key not expected ${fieldname}`);
+                busboy.emit('error', new APIError(`Unexpected field key`, 400));
+                hasErr = true;
+            } else {
+                newpost.set(fieldname, val);
+            }
+        }
+    });
+
+    busboy.on('file', async function (fieldname, file, filename, encoding, mimetype) {
+        if (!hasErr) {
+            // Deal with input file if fields are correct
+            let wStream = getRandomFileStream(fieldname, mimetype);
+            newpost.set('filepath', wStream.path);
+            file.pipe(wStream);
+            if (filename.length <= 0 || (mimetype != 'image/png' && mimetype != 'image/jpeg')) {
+                // mime types not allowed
+                busboy.emit('error', new APIError(`Malformed file`, 400));
+            } else {
+                // let's process the file with streams
+                processFile(file, wStream)
+                    .then(async () => {
+                        try {
+                            log.info(`Upload complete... Let's persist it`);
+                            const result = await createPost(req.user, newpost.get('description'), newpost.get('filepath'));
+                            res.writeHead(200, { Connection: 'close' });
+                            res.end(`{\"message\": \"OK\"}`);
+                        } catch(err) {
+                            log.error(`Unable to persist post, rolling back. ${err}`);
+                            busboy.emit('error', new APIError(`Internal error`, 500));
+                        }
+                    })
+                    .catch(err => {busboy.emit('error', err)});
+            }
+        } // else it's handled on Error
+    });
+    busboy.on('error', err => {
+        if (newpost.get('filepath')) {
+            // Only delete if stream of file started parsing
+            fs.unlink(newpost.get('filepath'), function (err) {
+                if (err) log.error(`Unable to delete file`);
+                // if no error, file has been deleted successfully
+                else log.info('File deleted!');
+            });  
+        }
+        // closeConnection(err.status, err.message);
+        req.unpipe(busboy);
+        next(err);
+    });
+    return req.pipe(busboy);
+}
+
+// MIDDLEWARES
+app.use(jsonMW);
+app.use(cookieparserMW);
+app.use(sessionMW);
+app.use(myloggerMW);
+// ROUTES
+router.post('/register', registerPost);
+router.post('/login', loginPost);
+router.get('/restricted', IsAuthMW, restrictedGet);
+router.post('/upload', IsAuthMW, uploadPost);
+router.use('/api-docs', swaggerUi.serve);
+router.get('/api-docs', swaggerUi.setup(swaggerDoc));
+// ROUTES
+app.use('/v1', router);
+app.use(ErrorHandler);
+//The 404 Route
+app.use('*', function(req, res){
+    res.status(404).send('Not found');
+});
+  
 export default {
     app
 }
