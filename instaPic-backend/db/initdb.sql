@@ -3,6 +3,11 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(30) NOT NULL UNIQUE,
     created_at TIMESTAMP without time zone NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS users_test (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(30) NOT NULL UNIQUE,
+    created_at TIMESTAMP without time zone NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     user_id int NOT NULL,
@@ -10,7 +15,13 @@ CREATE TABLE IF NOT EXISTS posts (
     img_path VARCHAR NOT NULL UNIQUE,
     created_at TIMESTAMP without time zone NOT NULL DEFAULT now()
 );
-
+CREATE TABLE IF NOT EXISTS posts_test (
+    id SERIAL PRIMARY KEY,
+    user_id int NOT NULL,
+    description VARCHAR NOT NULL,
+    img_path VARCHAR NOT NULL UNIQUE,
+    created_at TIMESTAMP without time zone NOT NULL DEFAULT now()
+);
 CREATE TABLE "session" (
   "sid" varchar NOT NULL COLLATE "default",
 	"sess" json NOT NULL,
