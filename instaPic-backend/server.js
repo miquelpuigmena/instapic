@@ -1,4 +1,5 @@
 import express from 'express';
+import dotenv from 'dotenv';
 import fileType from 'file-type';
 import fs from 'fs';
 import Busboy from 'busboy';
@@ -13,6 +14,8 @@ import { dirname } from 'path';
 import {log} from './logger.js';
 import {finished} from 'stream';
 
+dotenv.config();
+
 class APIError extends Error {
     constructor(message, status) {
         super(message);
@@ -23,11 +26,10 @@ class APIError extends Error {
 // Util constants
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const port = process.env.PORT || 3000;
+const port = process.env.API_PORT || 3000;
 
 // db C
-const dbSessionTableName = process.env.DBSESSION;
-const dbSessSecret = process.env.SESSION_SECRET;
+const dbSessSecret = process.env.POSTGRES_SESSION_SECRET || "s3cr3t";
 
 // Swagger doc
 const rawdata = fs.readFileSync('./swagger.json');
@@ -47,7 +49,7 @@ var pgSession = connectpgsimple(session);
 const sessionMW = session({
     store: new pgSession({
         pool: getDbPool(),
-        tableName: dbSessionTableName
+        tableName: "session"
     }),
     secret: dbSessSecret,
     // depracated messages

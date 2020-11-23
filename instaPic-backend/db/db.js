@@ -1,6 +1,6 @@
 import pg from 'pg';
-import util from 'util';
 import dotenv from 'dotenv';
+import util from 'util';
 import {log} from './../logger.js';
 
 dotenv.config();
@@ -11,11 +11,11 @@ if (process.env.ENV_MODE == "TEST") {
 }
 const { Pool } = pg;
 const pool = new Pool({
-    user: process.env.DBUSER,
-    host: process.env.DBHOST,
-    database: process.env.DBNAME,
-    password: process.env.DBPASS,
-    port: process.env.DBPORT,
+    user: process.env.POSTGRES_USER,
+    host: process.env.POSTGRES_HOST,
+    database: process.env.POSTGRES_DB,
+    password: process.env.POSTGRES_PASSWORD,
+    port: process.env.POSTGRES_PORT,
 });
 
 export const getDbPool = () => {
