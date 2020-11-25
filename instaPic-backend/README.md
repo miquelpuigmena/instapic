@@ -2,7 +2,7 @@
 1. [Presenting the problem](#presenting-the-problem)
 1. [Highlights of the solution](#highlights-of-solution) 
 1. [API](#api)
-1. [Defining ENV vars](#define-.env-vars)
+1. [Defining ENV vars](#define-env-vars)
 1. [Build me](#build-me)
 1. [Test me](#testing)
 
@@ -139,7 +139,7 @@ An incoming petition will jump along middlewares. Listed you have a generic requ
 1. **ErrorHandler**: Handle all errors triggered in backend
 1. **NotFound**: Endpoint not found
 
-## Define .env vars
+## Define env vars
 Backend module expects to a `.env` file located at the top folder of the module (same level as index.js).
 
 Defining env vars 
