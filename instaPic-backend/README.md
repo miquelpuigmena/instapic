@@ -2,6 +2,7 @@
 1. [Presenting the problem](#presenting-the-problem)
 1. [Highlights of the solution](#highlights-of-solution) 
 1. [API](#api)
+1. [Defining ENV vars](#define-.env-vars)
 1. [Build me](#build-me)
 1. [Test me](#testing)
 
@@ -137,6 +138,21 @@ An incoming petition will jump along middlewares. Listed you have a generic requ
 1. **extend-endpoint**: Add /api/v1 to all routes
 1. **ErrorHandler**: Handle all errors triggered in backend
 1. **NotFound**: Endpoint not found
+
+## Define .env vars
+Backend module expects to a `.env` file located at the top folder of the module (same level as index.js).
+
+Defining env vars 
+```
+API_PORT=3000 #Port to start API
+API_PATH=/usr/src/api #Path to be used inside of Docker container
+POSTGRES_USER=admin #User at Postgres db
+POSTGRES_HOST=dbinstapic #IP of db reachable by API. Use docker-compose network!
+POSTGRES_DB=instapic #DB name
+POSTGRES_PASSWORD=XXXX #A secret
+POSTGRES_PORT=5432 #Port to find Postgres db
+POSTGRES_SESSION_SECRET=YYYY #A secret for API's sessions
+```
 
 ## Build me
 **REMEMEBER, YOU NEED AN ACTIVE POSTGRES DB LISTENING IN PORT AND WITH AUTH DEFINED IN .env FILE**
