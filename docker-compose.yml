@@ -20,7 +20,16 @@ services:
     working_dir: ${API_PATH}
     ports:
       - ${API_PORT}:${API_PORT}
-    expose:
-      - ${API_PORT}
     container_name: backendinstapic
-    command: bash -c "sleep 10 && npm start"
+    command: bash -c "sleep 7 && npm start"
+  web:
+    build: ./instapic-frontend
+    depends_on:
+      - db
+      - api
+    working_dir: ${WEB_PATH}
+    ports:
+      - ${WEB_PORT}:${WEB_PORT}
+    container_name: frontendinstapic
+    command: bash -c "serve -s build"
+    
