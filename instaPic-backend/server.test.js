@@ -24,7 +24,7 @@ describe('server.js test', () => {
             it("Unit-test: Should return status 200 and set-cookie", async () => {
                 let res = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(res.status).to.equal(200);
                 expect(res).to.containCookie({
@@ -35,7 +35,7 @@ describe('server.js test', () => {
                 // Wrong user format
                 let res = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 2});
                 expect(res.status).to.equal(400);
             });
@@ -43,7 +43,7 @@ describe('server.js test', () => {
                 // First reap user
                 let res = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(res.status).to.equal(200);
                 expect(res).to.containCookie({
@@ -52,7 +52,7 @@ describe('server.js test', () => {
                 // Second reap user
                 res = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(res.status).to.equal(500);
                 expect(res).to.containCookie({
@@ -66,7 +66,7 @@ describe('server.js test', () => {
                 // register user first and grab cookie
                 let resReg = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
@@ -76,7 +76,7 @@ describe('server.js test', () => {
                 // login user with cookie
                 let resLog = await chai
                     .request(appl)
-                    .post('/v1/login')
+                    .post('/api/v1/login')
                     .set('Cookie', cookie)
                     .send({name: 'reap'});
                 expect(resLog.status).to.equal(200);
@@ -85,7 +85,7 @@ describe('server.js test', () => {
                 // login user with wrong format username
                 let resLog = await chai
                     .request(appl)
-                    .post('/v1/login')
+                    .post('/api/v1/login')
                     .send({name: 2});
                 expect(resLog.status).to.equal(400);
             });
@@ -93,7 +93,7 @@ describe('server.js test', () => {
                 // login user without cookie
                 let resLog = await chai
                     .request(appl)
-                    .post('/v1/login')
+                    .post('/api/v1/login')
                     .send({name: 'reap'});
                 expect(resLog.status).to.equal(500);
             });
@@ -104,7 +104,7 @@ describe('server.js test', () => {
                 // register user first and grab cookie
                 let resReg = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
@@ -114,14 +114,14 @@ describe('server.js test', () => {
                 // login user with cookie
                 let resLog = await chai
                     .request(appl)
-                    .post('/v1/login')
+                    .post('/api/v1/login')
                     .set('Cookie', cookie)
                     .send({name: 'reap'});
                 expect(resLog.status).to.equal(200);
                 // Access restricted
                 let resRest = await chai
                     .request(appl)
-                    .get('/v1/restricted')
+                    .get('/api/v1/restricted')
                     .set('Cookie', cookie)
                     .send();
                 expect(resRest.status).to.equal(200);
@@ -131,7 +131,7 @@ describe('server.js test', () => {
                 // register user first and grab cookie
                 let resReg = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
@@ -141,7 +141,7 @@ describe('server.js test', () => {
                 // Access restricted without logging user
                 let resRest = await chai
                     .request(appl)
-                    .get('/v1/restricted')
+                    .get('/api/v1/restricted')
                     .set('Cookie', cookie)
                     .send();
                 expect(resRest.status).to.equal(401);
@@ -153,7 +153,7 @@ describe('server.js test', () => {
                 // register user first and grab cookie
                 let resReg = await chai
                     .request(appl)
-                    .post('/v1/register')
+                    .post('/api/v1/register')
                     .send({name: 'reap'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
@@ -163,14 +163,14 @@ describe('server.js test', () => {
                 // login user with cookie
                 let resLog = await chai
                     .request(appl)
-                    .post('/v1/login')
+                    .post('/api/v1/login')
                     .set('Cookie', cookie)
                     .send({name: 'reap'});
                 expect(resLog.status).to.equal(200);
                 // upload file
                 let resUpl = await chai
                     .request(appl)
-                    .post('/v1/upload')
+                    .post('/api/v1/upload')
                     .set('Cookie', cookie)
                     .set('Content-type', 'multipart/form-data')
                     .field('description', 'Integration-test: Should return 200')
@@ -182,7 +182,7 @@ describe('server.js test', () => {
                     // register user first and grab cookie
                     let resReg = await chai
                         .request(appl)
-                        .post('/v1/register')
+                        .post('/api/v1/register')
                         .send({name: 'reap'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
@@ -192,14 +192,14 @@ describe('server.js test', () => {
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
-                        .post('/v1/login')
+                        .post('/api/v1/login')
                         .set('Cookie', cookie)
                         .send({name: 'reap'});
                     expect(resLog.status).to.equal(200);
                     // upload file
                     let resUpl = await chai
                         .request(appl)
-                        .post('/v1/upload')
+                        .post('/api/v1/upload')
                         .set('Cookie', cookie)
                         .set('Content-type', 'multipart/form-data')
                         .field('description', 'Integration-test: Should return 400')
@@ -214,7 +214,7 @@ describe('server.js test', () => {
                     // register user first and grab cookie
                     let resReg = await chai
                         .request(appl)
-                        .post('/v1/register')
+                        .post('/api/v1/register')
                         .send({name: 'reap'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
@@ -224,14 +224,14 @@ describe('server.js test', () => {
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
-                        .post('/v1/login')
+                        .post('/api/v1/login')
                         .set('Cookie', cookie)
                         .send({name: 'reap'});
                     expect(resLog.status).to.equal(200);
                     // upload file
                     let resUpl = await chai
                         .request(appl)
-                        .post('/v1/upload')
+                        .post('/api/v1/upload')
                         .set('Cookie', cookie)
                         .set('Content-type', 'multipart/form-data')
                         .field('reap', 'Integration-test: Should return 400')
@@ -246,7 +246,7 @@ describe('server.js test', () => {
                     // register user first and grab cookie
                     let resReg = await chai
                         .request(appl)
-                        .post('/v1/register')
+                        .post('/api/v1/register')
                         .send({name: 'reap'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
@@ -256,14 +256,14 @@ describe('server.js test', () => {
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
-                        .post('/v1/login')
+                        .post('/api/v1/login')
                         .set('Cookie', cookie)
                         .send({name: 'reap'});
                     expect(resLog.status).to.equal(200);
                     // upload file
                     let resUpl = await chai
                         .request(appl)
-                        .post('/v1/upload')
+                        .post('/api/v1/upload')
                         .set('Cookie', cookie)
                         .set('Content-type', 'multipart/form-data')
                         .field('description', 'Integration-test: Should return 400')
@@ -278,7 +278,7 @@ describe('server.js test', () => {
                     // register user first and grab cookie
                     let resReg = await chai
                         .request(appl)
-                        .post('/v1/register')
+                        .post('/api/v1/register')
                         .send({name: 'reap'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
@@ -288,14 +288,14 @@ describe('server.js test', () => {
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
-                        .post('/v1/login')
+                        .post('/api/v1/login')
                         .set('Cookie', cookie)
                         .send({name: 'reap'});
                     expect(resLog.status).to.equal(200);
                     // upload file
                     let resUpl = await chai
                         .request(appl)
-                        .post('/v1/upload')
+                        .post('/api/v1/upload')
                         .set('Cookie', cookie)
                         .set('Content-type', 'multipart/form-data')
                         .field('description', 'Integration-test: Should return 400')

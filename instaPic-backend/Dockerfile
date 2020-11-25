@@ -1,6 +1,6 @@
 FROM node
 # Create app directory
-WORKDIR /usr/src/instapic
+WORKDIR /usr/src/instapic/backend
 # Install app dependencies
 COPY package*.json ./
 RUN npm install

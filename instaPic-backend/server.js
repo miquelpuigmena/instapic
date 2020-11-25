@@ -12,7 +12,6 @@ import util from 'util';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import {log} from './logger.js';
-import {finished} from 'stream';
 
 dotenv.config();
 
@@ -54,6 +53,7 @@ const sessionMW = session({
     secret: dbSessSecret,
     // depracated messages
     resave: false,
+    // saveUninitialized: false,
     // cookie's params
     cookie: { maxAge: 30 * 60 * 1000 } // 30 min
 });
@@ -238,6 +238,14 @@ const uploadPost = async (req, res, next) => {
 }
 
 // MIDDLEWARES
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin); // Only for dev!
+    // res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Content-type");
+    next();
+});
+//app.use(cors); // Solve Cross-Origin Request Blocked. Only for dev!
 app.use(jsonMW);
 app.use(cookieparserMW);
 app.use(sessionMW);
@@ -250,7 +258,7 @@ router.post('/upload', IsAuthMW, uploadPost);
 router.use('/api-docs', swaggerUi.serve);
 router.get('/api-docs', swaggerUi.setup(swaggerDoc));
 // ROUTES
-app.use('/v1', router);
+app.use('/api/v1', router);
 app.use(ErrorHandler);
 //The 404 Route
 app.use('*', function(req, res){
