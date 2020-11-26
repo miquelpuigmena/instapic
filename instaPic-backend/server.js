@@ -144,6 +144,7 @@ const processFile = (file, wStream) => {
         let cntChunks = 0;
 
         file.on('data', async data => {
+            cntChunks++;
             // On data chunk received
             //      check magic numbers if it's chunk0
             //      count chunks if other
@@ -154,11 +155,10 @@ const processFile = (file, wStream) => {
                 } else {
                     // Invalid post, magic numbers not jpg or png
                     wStream.emit('error', new APIError(`Malformed file`, 400));
-                    wStream.destroy();
+                    //wStream.destroy();
                     file.resume();
                 }
             }
-            cntChunks++;
         });
         wStream.on('error', err => {
             rej(err);
