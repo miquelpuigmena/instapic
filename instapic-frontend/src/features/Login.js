@@ -116,7 +116,7 @@ class LoginComponent extends React.Component {
             this.buttonText = 'Loading...';
             break;
         case STATE_SUCCESS_LOGIN:
-            this.buttonText = nextProps.username; 
+            this.buttonText = 'SUCCESS'; 
             break;
         case STATE_FAILED_LOGIN:
             this.buttonText = 'FAILED';
