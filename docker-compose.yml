@@ -42,5 +42,5 @@ services:
     ports:
       - ${REACT_APP_WEB_PORT}:${REACT_APP_WEB_PORT}
     container_name: frontendinstapic
-    command: bash -c "sleep 9 && serve -s build"
+    command: bash -c "sleep 10 && serve -s build"
     

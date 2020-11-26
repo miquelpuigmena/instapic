@@ -47,7 +47,7 @@ const setSession2User = (user_id, sid) => {
       log.info(`Updated session ${sid} with user ${user_id}`);
       return res(result);
     } catch (err) {
-      log.error(`Error: unable to set user_id ${user_id} to sessId ${sid} err='${err.message}'`);
+      log.error(`Error: unable to set sessId ${sid} to user_id ${user_id} err='${err.message}'`);
       return rej(err);
     }
   });

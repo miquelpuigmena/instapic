@@ -47,7 +47,6 @@ const asyncSignup = username => dispatch => {
       name: username
     })
     .then(res => {
-      console.log("Signup response ", res);
       dispatch(signupSuccessAction());
       dispatch(redirectTo('/login'));
     })

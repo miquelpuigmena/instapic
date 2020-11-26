@@ -40,13 +40,16 @@ const redirectTo = (to) => dispatch => {
 
 
 // async action
-const asyncLogin = username => dispatch => {
+const asyncLogin = (username, useCredentials) => dispatch => {
     dispatch(loginAction(username));
     axios
         .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/login`, {
-            // This one should include cookie gathered by browser at register action!
-            name: username,
-        }, {withCredentials:true})
+                // This one should include cookie gathered by browser at register action!
+                name: username,
+            }, 
+            // not using credentials if in test and use credentials deactivated
+            {withCredentials: useCredentials}
+        )
         .then(res => {
             dispatch(loginSuccessAction());
             dispatch(authAction(username));
@@ -98,6 +101,7 @@ class LoginComponent extends React.Component {
         this.state = {
             username: '',
         };
+        this.useCredentials = (typeof this.props.useCredentials === 'undefined') ? true: this.props.useCredentials;
         this.buttonText = 'LOG IN';
     }
     handleChange = (username) => {
@@ -139,7 +143,7 @@ class LoginComponent extends React.Component {
                     onChange={e => this.handleChange(e.target.value)}
                     />
                 </Form.Group>
-                <Button id="button-login" className="btn-warning" block size="lg" onClick={() => this.props.login(this.state.username)} >
+                <Button id="button-login" className="btn-warning" block size="lg" onClick={() => this.props.login(this.state.username, this.useCredentials)} >
                     {this.buttonText}
                 </Button>
                 </Form>
@@ -156,7 +160,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        login: (username) => {dispatch(asyncLogin(username))},
+        login: (username, useCredentials) => {dispatch(asyncLogin(username, useCredentials))},
         goToIdle: () => {dispatch(goToIdleAction())},
     }
 };

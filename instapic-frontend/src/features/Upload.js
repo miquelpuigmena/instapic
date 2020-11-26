@@ -5,7 +5,7 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 // front-end
 import "./styles.css";
-
+import util from 'util';
 // constants
 const UPLOAD_IDLE = "UPLOAD_IDLE";
 const UPLOAD_REQ = "UPLOAD_REQ";
@@ -32,7 +32,7 @@ const redirectTo = (to) => dispatch => {
   dispatch(push(to));
 };
 // async action
-const asyncUpload = (file, description) => dispatch => {
+const asyncUpload = (file, description, useCredentials) => dispatch => {
   try {
     dispatch(uploadAction());
     const formData = new FormData();
@@ -44,7 +44,12 @@ const asyncUpload = (file, description) => dispatch => {
       }
     };
     axios
-      .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/upload`, formData, {withCredentials:true}, config)
+      .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/upload`, 
+        formData, 
+        // not using credentials if in test and use credentials deactivated
+        {withCredentials: useCredentials}, 
+        config
+      )
       .then(res => {
         dispatch(uploadSuccessAction());
         dispatch(redirectTo('/success'));
@@ -92,17 +97,19 @@ class UploadComponent extends React.Component {
       description: '',
       file: null,
     };
+    this.useCredentials = (typeof this.props.useCredentials === 'undefined') ? true: this.props.useCredentials;
     this.buttonText = 'UPLOAD';
   }
   handleFileChange = (file) => {
     this.setState({ filename: file.name });
     this.setState({ file });
-    if (this.props.status === STATE_FAILED_UPLOAD) {
+    if (this.props.status !== STATE_IS_LOADING) {
       // First change after a failed status 
       this.props.goToIdle();
     }
   };
   handleDescriptionChange = (description) => {
+    console.log('new desc ', description);
     this.setState({ description });
     if (this.props.status !== STATE_IS_LOADING) {
       this.props.goToIdle();
@@ -110,7 +117,7 @@ class UploadComponent extends React.Component {
   };
   onFormSubmit = () => {
     if (this.state.file !== null && this.state.description !== ''){
-      this.props.upload(this.state.file, this.state.description);
+      this.props.upload(this.state.file, this.state.description, this.useCredentials);
     }
   }
   shouldComponentUpdate(nextProps) {
@@ -143,7 +150,7 @@ class UploadComponent extends React.Component {
               <input id="file-input" type="file" onChange={(e) => this.handleFileChange(e.target.files[0])} />
               <br></br>
               <br></br>
-              <input id="description-input" type="text" placeholder="descriprion" onChange={(e) => this.handleDescriptionChange(e.target.value)} />
+              <input id="description-input" type="text" placeholder="description" onChange={(e) => this.handleDescriptionChange(e.target.value)} />
               <br></br>
               <br></br>
               <Button id="button-upload" onClick={() => {this.onFormSubmit()}}>{this.buttonText}</Button>
@@ -162,7 +169,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
   return {
-    upload: (file, description) => { dispatch(asyncUpload(file, description)); },
+    upload: (file, description, useCredentials) => { dispatch(asyncUpload(file, description, useCredentials)); },
     goToIdle: () => { dispatch(goToIdleAction()); },
     redirectTo: (to) => { dispatch(push(to)); },
   };

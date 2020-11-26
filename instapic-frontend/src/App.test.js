@@ -16,7 +16,6 @@ describe('Unit Test App', () => {
         </Router>
       </Provider>
     );
-    console.log(container.querySelector('#app'));
     expect(container.querySelectorAll('#app').length).toBe(1);
   });
 });
