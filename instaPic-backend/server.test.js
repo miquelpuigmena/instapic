@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import dotenv from 'dotenv';
 import chaiCookie from 'chai-expected-cookie';
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -7,6 +8,8 @@ chai.use(chaiCookie);
 import {appl} from './index.js';
 import {truncateTable} from './db/db.js';
 import fs from 'fs';
+
+dotenv.config();
 
 describe('server.js test', () => {
     beforeEach(async () => {
@@ -25,7 +28,7 @@ describe('server.js test', () => {
                 let res = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-reg1'});
                 expect(res.status).to.equal(200);
                 expect(res).to.containCookie({
                     name: 'connect.sid'
@@ -44,7 +47,7 @@ describe('server.js test', () => {
                 let res = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-reg2'});
                 expect(res.status).to.equal(200);
                 expect(res).to.containCookie({
                     name: 'connect.sid'
@@ -53,7 +56,7 @@ describe('server.js test', () => {
                 res = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-reg2'});
                 expect(res.status).to.equal(500);
                 expect(res).to.containCookie({
                     name: 'connect.sid'
@@ -67,19 +70,20 @@ describe('server.js test', () => {
                 let resReg = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-log1'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
                     name: 'connect.sid'
                 });
-                const cookie = resReg.headers['set-cookie'][0];
                 // login user with cookie
                 let resLog = await chai
                     .request(appl)
                     .post('/api/v1/login')
-                    .set('Cookie', cookie)
-                    .send({name: 'reap'});
+                    .send({name: 'reap-log1'});
                 expect(resLog.status).to.equal(200);
+                expect(resLog).to.containCookie({
+                    name: 'connect.sid'
+                });
             });
             it("Unit-test: Should return status 400", async () => {
                 // login user with wrong format username
@@ -94,30 +98,33 @@ describe('server.js test', () => {
                 let resLog = await chai
                     .request(appl)
                     .post('/api/v1/login')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-log2'});
                 expect(resLog.status).to.equal(500);
             });
         });
         // Restricted
         describe("GET /restricted", () => {
             it("Integration-test: Should return status 200", async () => {
-                // register user first and grab cookie
+                // register user first
                 let resReg = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-restr1'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
                     name: 'connect.sid'
                 });
-                const cookie = resReg.headers['set-cookie'][0];
-                // login user with cookie
+                // login user with cookie and grab cookie
                 let resLog = await chai
                     .request(appl)
                     .post('/api/v1/login')
-                    .set('Cookie', cookie)
-                    .send({name: 'reap'});
+                    .send({name: 'reap-restr1'});
                 expect(resLog.status).to.equal(200);
+                expect(resLog).to.containCookie({
+                    name: 'connect.sid'
+                });
+                const cookie = resLog.headers['set-cookie'][0];
+
                 // Access restricted
                 let resRest = await chai
                     .request(appl)
@@ -132,7 +139,7 @@ describe('server.js test', () => {
                 let resReg = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-restr2'});
                 expect(resReg.status).to.equal(200);
                 expect(resReg).to.containCookie({
                     name: 'connect.sid'
@@ -154,19 +161,19 @@ describe('server.js test', () => {
                 let resReg = await chai
                     .request(appl)
                     .post('/api/v1/register')
-                    .send({name: 'reap'});
+                    .send({name: 'reap-upl1'});
                 expect(resReg.status).to.equal(200);
-                expect(resReg).to.containCookie({
-                    name: 'connect.sid'
-                });
-                const cookie = resReg.headers['set-cookie'][0];
+
                 // login user with cookie
                 let resLog = await chai
                     .request(appl)
                     .post('/api/v1/login')
-                    .set('Cookie', cookie)
-                    .send({name: 'reap'});
+                    .send({name: 'reap-upl1'});
                 expect(resLog.status).to.equal(200);
+                expect(resLog).to.containCookie({
+                    name: 'connect.sid'
+                });
+                const cookie = resLog.headers['set-cookie'][0];
                 // upload file
                 let resUpl = await chai
                     .request(appl)
@@ -179,23 +186,26 @@ describe('server.js test', () => {
             });
             it("Integration-test: Should return 400 (text file instead of image)", async () => {
                 try {
-                    // register user first and grab cookie
+                    // register user first
                     let resReg = await chai
                         .request(appl)
                         .post('/api/v1/register')
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl2'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
                     name: 'connect.sid'
                     });
-                    const cookie = resReg.headers['set-cookie'][0];
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
                         .post('/api/v1/login')
-                        .set('Cookie', cookie)
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl2'});
                     expect(resLog.status).to.equal(200);
+                    expect(resLog).to.containCookie({
+                        name: 'connect.sid'
+                    });
+                    const cookie = resLog.headers['set-cookie'][0];
+
                     // upload file
                     let resUpl = await chai
                         .request(appl)
@@ -207,6 +217,7 @@ describe('server.js test', () => {
                     expect(resUpl.status).to.equal(400);
                 } catch(err) {
                     console.log(`Failed test: ${err}`);
+                    throw new Error(`Failed test: ${err}`);
                 }
             });
             it("Integration-test: Should return 400 (field not known)", async () => {
@@ -215,19 +226,22 @@ describe('server.js test', () => {
                     let resReg = await chai
                         .request(appl)
                         .post('/api/v1/register')
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl3'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
                     name: 'connect.sid'
                     });
-                    const cookie = resReg.headers['set-cookie'][0];
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
                         .post('/api/v1/login')
-                        .set('Cookie', cookie)
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl3'});
                     expect(resLog.status).to.equal(200);
+                    expect(resLog).to.containCookie({
+                        name: 'connect.sid'
+                    });
+                    const cookie = resLog.headers['set-cookie'][0];
+
                     // upload file
                     let resUpl = await chai
                         .request(appl)
@@ -239,6 +253,7 @@ describe('server.js test', () => {
                     expect(resUpl.status).to.equal(400);
                 } catch(err) {
                     console.log(`Failed test: ${err}`);
+                    throw new Error(`Failed test: ${err}`);
                 }
             });
             it("Integration-test: Should return 400 (hidden py file in png extension)", async () => {
@@ -247,19 +262,22 @@ describe('server.js test', () => {
                     let resReg = await chai
                         .request(appl)
                         .post('/api/v1/register')
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl4'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
-                    name: 'connect.sid'
+                        name: 'connect.sid'
                     });
-                    const cookie = resReg.headers['set-cookie'][0];
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
                         .post('/api/v1/login')
-                        .set('Cookie', cookie)
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl4'});
                     expect(resLog.status).to.equal(200);
+                    expect(resLog).to.containCookie({
+                        name: 'connect.sid'
+                    });
+                    const cookie = resLog.headers['set-cookie'][0];
+
                     // upload file
                     let resUpl = await chai
                         .request(appl)
@@ -271,6 +289,7 @@ describe('server.js test', () => {
                     expect(resUpl.status).to.equal(400);
                 } catch(err) {
                     console.log(`Failed test: ${err}`);
+                    throw new Error(`Failed test: ${err}`);
                 }
             });
             it("Integration-test: Should return 400 (field not known && hidden py file in png extension)", async () => {
@@ -279,19 +298,22 @@ describe('server.js test', () => {
                     let resReg = await chai
                         .request(appl)
                         .post('/api/v1/register')
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl5'});
                     expect(resReg.status).to.equal(200);
                     expect(resReg).to.containCookie({
-                    name: 'connect.sid'
+                        name: 'connect.sid'
                     });
-                    const cookie = resReg.headers['set-cookie'][0];
                     // login user with cookie
                     let resLog = await chai
                         .request(appl)
                         .post('/api/v1/login')
-                        .set('Cookie', cookie)
-                        .send({name: 'reap'});
+                        .send({name: 'reap-upl5'});
                     expect(resLog.status).to.equal(200);
+                    expect(resLog).to.containCookie({
+                        name: 'connect.sid'
+                    });
+                    const cookie = resLog.headers['set-cookie'][0];
+
                     // upload file
                     let resUpl = await chai
                         .request(appl)
@@ -304,6 +326,7 @@ describe('server.js test', () => {
                     expect(resUpl.text).to.equal('{"message":"Malformed file"}');
                 } catch(err) {
                     console.log(`Failed test: ${err}`);
+                    throw new Error(`Failed test: ${err}`);
                 }
             });
         });

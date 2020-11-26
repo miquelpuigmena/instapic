@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import util from 'util';
 import {log} from './../logger.js';
 
-dotenv.config();
+dotenv.config('./../.env');
 
 var tablePrefix = "";
 if (process.env.ENV_MODE == "TEST") {
@@ -28,7 +28,8 @@ export const loginUser = (username, sid) => {
   return new Promise(async (res, rej) => {
     try {
       let userId = await getUser(username);
-      const result = await setUser2Session(userId, sid);
+      const result = await setSession2User(userId, sid);
+      log.info(util.inspect(result));
       log.info(`Logged user ${username} to sid ${sid}`);
       return res(result);
     } catch (err) {
@@ -38,11 +39,11 @@ export const loginUser = (username, sid) => {
   });
 }
 
-const setUser2Session = (user_id, sid) => {
+const setSession2User = (user_id, sid) => {
   return new Promise(async (res, rej) => {
     try {
       const result = await pool
-        .query('UPDATE session SET user_id = $1 WHERE sid = $2', [user_id, sid]);
+        .query(`UPDATE users${tablePrefix} SET session = ($1) WHERE id = ($2)`, [sid, user_id]);
       log.info(`Updated session ${sid} with user ${user_id}`);
       return res(result);
     } catch (err) {
@@ -56,9 +57,12 @@ export const getUserBySessionId = (sid) => {
   return new Promise(async (res, rej) => {
     try {
       const result = await pool
-        .query('SELECT * FROM session WHERE sid = $1', [sid]);
-      log.info(`Fetched user_id ${result.rows[0]['user_id']} from sid ${sid}`);
-      return res(result.rows[0]['user_id']);
+        .query(`SELECT * FROM users${tablePrefix} WHERE session = ($1)`, [sid]);
+      log.info(`Fetched user ${result.rows[0]['name']} from sid ${sid}`);
+      if (result.rows[0] != undefined) {
+        return res(result.rows[0]['id']);
+      }
+      return -1;
     } catch (err) {
       log.error(`Error: unable to fetch user from sessId ${sid} err='${err.message}'`);
       return rej(err);
@@ -84,7 +88,7 @@ export const getUser = (name) => {
   return new Promise(async (res, rej) => {
     try {
       const result = await pool
-        .query(`SELECT * FROM users${tablePrefix} WHERE name = $1`, [name]);
+        .query(`SELECT * FROM users${tablePrefix} WHERE name = ($1)`, [name]);
       log.info(`Get username ${name} got id=${result.rows[0]['id']}`);
       return res(result.rows[0]['id']);
     } catch (err) {

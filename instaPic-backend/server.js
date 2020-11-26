@@ -58,7 +58,7 @@ const sessionMW = session({
     cookie: { maxAge: 30 * 60 * 1000 } // 30 min
 });
 const myloggerMW = (req, res, next) => {
-    log.info(`Incoming Request sid=${req.sessionID}, body=${util.inspect(req.body)}, user=${req.user}`);
+    log.info(`Incoming Request ${req.originalUrl}: sid=${req.sessionID}, body=${util.inspect(req.body)}, user=${req.user}`);
     next();
 }
 const ErrorHandler = (err, req, res, next) => {
@@ -72,7 +72,7 @@ const IsAuthMW = async (req, res, next) => {
         let sessId = req.sessionID;
         log.info(`IsAuth function sess_id=${sessId}`);
         let userId = await getUserBySessionId(sessId);
-        if (userId == 0) {
+        if (userId == -1) {
             // Cookie exists but not logged in
             throw new Error();
         }
@@ -144,20 +144,22 @@ const processFile = (file, wStream) => {
         let cntChunks = 0;
 
         file.on('data', async data => {
-            cntChunks++;
             // On data chunk received
             //      check magic numbers if it's chunk0
             //      count chunks if other
             if (cntChunks == 0) {
+                cntChunks++;
                 // First chunk
                 if (await isMagicNumbersValid(data)) {
                     log.info(`Magic Numbers are either jpg or png`);
                 } else {
                     // Invalid post, magic numbers not jpg or png
                     wStream.emit('error', new APIError(`Malformed file`, 400));
-                    //wStream.destroy();
+                    wStream.destroy();
                     file.resume();
                 }
+            } else {
+                cntChunks++;
             }
         });
         wStream.on('error', err => {
