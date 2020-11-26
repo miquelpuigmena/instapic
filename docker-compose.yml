@@ -13,6 +13,7 @@ services:
     volumes:
       - "./instaPic-backend/db/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql"
     container_name: dbinstapic
+    command: ["postgres", "-c", "log_statement=all"]
   api:
     build: 
       context: ./instaPic-backend
@@ -25,7 +26,7 @@ services:
     ports:
       - ${API_PORT}:${API_PORT}
     container_name: backendinstapic
-    command: bash -c "sleep 7 && npm start"
+    command: bash -c "sleep 6 && npm start"
   web:
     build: 
       context: ./instapic-frontend
@@ -41,5 +42,5 @@ services:
     ports:
       - ${REACT_APP_WEB_PORT}:${REACT_APP_WEB_PORT}
     container_name: frontendinstapic
-    command: bash -c "serve -s build"
+    command: bash -c "sleep 9 && serve -s build"
     

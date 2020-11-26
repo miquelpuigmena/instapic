@@ -1,11 +1,16 @@
 # Reap - InstaPic
 This repository includes the fullstack application InstaPic.
 
-It's divided by two main groups: backend and frontend. Each group has it's own documentation [backend-doc](./instaPic-backend/README.md), [frontend-doc](./instapic-frontend/README.md)
+It's divided by two main groups: backend and frontend. Each group has it's own documentation [backend-readme](./instaPic-backend/README.md), [frontend-readme](./instapic-frontend/README.md)
 
-URL public app: myurl
+**URL public app front-end**: 
 
-or click [here](myurl)
+`http://52.59.72.136:5000` or click [here](http://52.59.72.136:5000)
+
+**URL public API documentation**: 
+
+`http://52.59.72.136:3000/api/v1/api-docs` or click [here](http://52.59.72.136:3000/api/v1/api-docs)
+
 ## Build me
 Find a [docker-compose.yml](./docker-compose.yml) file to facilitate building task. To abstract the building process even more, a [build.sh](./build.sh) is provided.
 
@@ -28,9 +33,12 @@ Test all
 ./build.sh --test-all
 ```
 
-Test module ABC
+Test module web only
 ```
-# Notice that there's only web and api modules.
-./build.sh --test-ABC
+./build.sh --test-web
+```
+Test module api only
+```
+./build.sh --test-api
 ```
 

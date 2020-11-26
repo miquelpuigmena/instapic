@@ -6,7 +6,7 @@ fi
 
 if [[ $1 ==  "--test-api" ]]
 then
-    set -a && source instapic-frontend/src/.env && source instaPic-backend/.env && docker-compose down
+    set -a && source instapic-frontend/src/.test.env && source instaPic-backend/.env && docker-compose down
     docker-compose build
     docker-compose run --rm api npm test
     docker-compose down
@@ -14,14 +14,14 @@ elif [[ $1 == "--test-web" ]]
 then
     set -a && source instapic-frontend/src/.test.env && source instaPic-backend/.env && docker-compose down
     docker-compose build
-    docker-compose run --rm web npm test
+    docker-compose run --rm web bash -c "echo 'Waiting api to spawn...' && sleep 10 && npm test"
     docker-compose down
 elif [[ $1 == "--test-all" ]]
 then
     set -a && source instapic-frontend/src/.test.env && source instaPic-backend/.env && docker-compose down
     docker-compose build
     docker-compose run --rm api npm test
-    docker-compose run --rm web npm test
+    docker-compose run --rm web bash -c "echo 'Waiting api to spawn...' && sleep 10 && npm test"
     docker-compose down
 elif [[ $1 == "--run" ]]
 then
