@@ -8,11 +8,11 @@ import Nav from 'react-bootstrap/Nav';
 function MyNavbar(props) {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
-            <Navbar.Brand color="#FFFF00" onClick={() => props.redirectTo('/home')}>Reap - InstaPic</Navbar.Brand>
+            <Navbar.Brand id="basic-navbar-brand" color="#FFFF00" onClick={() => props.redirectTo('/home')}>Reap - InstaPic</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="mr-auto">
-                    <Nav.Link onClick={() => props.redirectTo('/upload')}>Upload!</Nav.Link>
+                    <Nav.Link id="basic-navbar-nav-upload" onClick={() => props.redirectTo('/upload')}>Upload!</Nav.Link>
                 </Nav>
                 <Nav className="ml-auto">
                     {props.isAuthed

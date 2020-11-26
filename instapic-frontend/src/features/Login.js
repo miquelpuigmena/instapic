@@ -43,7 +43,7 @@ const redirectTo = (to) => dispatch => {
 const asyncLogin = username => dispatch => {
     dispatch(loginAction(username));
     axios
-        .post(`http://${process.env.API_HOST}:${process.env.API_PORT}/api/v1/login`, {
+        .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/login`, {
             // This one should include cookie gathered by browser at register action!
             name: username,
         }, {withCredentials:true})
@@ -131,7 +131,7 @@ class LoginComponent extends React.Component {
         return (
             <div className="MyForm">
                 <Form onSubmit={() => {return false;}}>
-                <Form.Group size="lg" controlId="username">
+                <Form.Group size="lg" controlId="username" id="input-group-login">
                     <Form.Label>Username</Form.Label>
                     <Form.Control
                     autoFocus
@@ -140,7 +140,7 @@ class LoginComponent extends React.Component {
                     onChange={e => this.handleChange(e.target.value)}
                     />
                 </Form.Group>
-                <Button className="btn-warning" block size="lg" onClick={() => this.props.login(this.state.username)} >
+                <Button id="button-login" className="btn-warning" block size="lg" onClick={() => this.props.login(this.state.username)} >
                     {this.buttonText}
                 </Button>
                 </Form>

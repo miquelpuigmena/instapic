@@ -20,9 +20,13 @@ const createRootReducer = (history) => combineReducers({
   upload: uploadReducer,
 });
 
-const loggerMiddleware = createLogger();
+let MWs = [thunk, routerMiddleware(history)]
+if (process.env.NODE_ENV == 'development') {
+  const loggerMiddleware = createLogger();
+  MWs = [...MWs, loggerMiddleware]
+}
 
 export default createStore(
   createRootReducer(history), 
-  applyMiddleware(thunk, routerMiddleware(history), loggerMiddleware)
+  applyMiddleware(...MWs)
 );

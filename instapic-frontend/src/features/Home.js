@@ -8,7 +8,7 @@ function HomeComponent(props)  {
         <div>
         {props.isAuthed
         ? <h1>Welcome Home {props.username}!</h1>
-        :  <h1>Please <Link onClick={() => {props.redirectTo('login')}}>LOG IN</Link> before coming home!</h1>}
+        :  <h1>Please <p onClick={() => {props.redirectTo('login')}}>LOG IN</p> before coming home!</h1>}
         </div>
     );
 }

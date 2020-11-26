@@ -45,7 +45,7 @@ const asyncUpload = (file, description) => dispatch => {
       }
     };
     axios
-      .post(`http://${process.env.API_HOST}:${process.env.API_PORT}/api/v1/upload`, formData, {withCredentials:true}, config)
+      .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/upload`, formData, {withCredentials:true}, config)
       .then(res => {
         dispatch(uploadSuccessAction());
         dispatch(redirectTo('/success'));
@@ -142,16 +142,16 @@ class UploadComponent extends React.Component {
           ? (
             <div>
               <h1>File Upload</h1>
-              <input type="file" onChange={(e) => this.handleFileChange(e.target.files[0])} />
+              <input id="file-input" type="file" onChange={(e) => this.handleFileChange(e.target.files[0])} />
               <br></br>
               <br></br>
-              <input type="text" placeholder="descriprion" onChange={(e) => this.handleDescriptionChange(e.target.value)} />
+              <input id="description-input" type="text" placeholder="descriprion" onChange={(e) => this.handleDescriptionChange(e.target.value)} />
               <br></br>
               <br></br>
-              <Button onClick={() => {this.onFormSubmit()}}>{this.buttonText}</Button>
+              <Button id="button-upload" onClick={() => {this.onFormSubmit()}}>{this.buttonText}</Button>
             </div>
           )
-          : <h1>Please <Link onClick={() => this.props.redirectTo('/login')}>LOG IN</Link> before coming home!</h1>}
+          : <h1>Please <p onClick={() => this.props.redirectTo('/login')}>LOG IN</p> before coming home!</h1>}
       </div>
     );
   }

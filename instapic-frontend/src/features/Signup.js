@@ -9,6 +9,7 @@ import Form from "react-bootstrap/Form";
 import Button from 'react-bootstrap/Button';
 import "./styles.css";
 
+
 // constants
 const SIGN_UP_IDLE = "SIGNUP_IDLE";
 const SIGN_UP_REQ = "SIGNUP_REQ";
@@ -42,7 +43,7 @@ const redirectTo = (to) => dispatch => {
 const asyncSignup = username => dispatch => {
   dispatch(signupAction(username));
   axios
-    .post(`http://${process.env.API_HOST}:${process.env.API_PORT}/api/v1/register`, {
+    .post(`http://${process.env.REACT_APP_API_HOST}:${process.env.REACT_APP_API_PORT}/api/v1/register`, {
       name: username
     })
     .then(res => {
@@ -111,7 +112,7 @@ class SignupComponent extends React.Component {
         this.buttonText = 'Loading...';
         break;
       case STATE_SUCCESS_REGISTER:
-        this.buttonText = nextProps.username; 
+        this.buttonText = 'SUCCESS'; 
         break;
       case STATE_FAILED_REGISTER:
         this.buttonText = 'FAILED';
@@ -127,7 +128,7 @@ class SignupComponent extends React.Component {
     return (
       <div className="MyForm">
         <Form onSubmit={() => {return false;}}>
-          <Form.Group size="lg" controlId="username">
+          <Form.Group size="lg" controlId="username" id="input-group-signup">
             <Form.Label>Username</Form.Label>
             <Form.Control
               autoFocus
@@ -136,7 +137,7 @@ class SignupComponent extends React.Component {
               onChange={e => this.handleChange(e.target.value)}
             />
           </Form.Group>
-          <Button className="btn btn-primary" block size="lg" onClick={() => this.props.signup(this.state.username)} >
+          <Button id="button-signup" className="btn btn-primary" block size="lg" onClick={() => this.props.signup(this.state.username)} >
             {this.buttonText}
           </Button>
         </Form>

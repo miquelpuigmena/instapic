@@ -24,7 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "MODE=TEST CI=true react-scripts test --coverage --forceExit",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
