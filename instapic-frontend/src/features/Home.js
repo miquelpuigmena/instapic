@@ -1,14 +1,13 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { push } from 'connected-react-router';
-import {Link} from 'react-router-dom';
 
 function HomeComponent(props)  {
     return (
         <div>
         {props.isAuthed
         ? <h1>Welcome Home {props.username}!</h1>
-        :  <h1>Please <p onClick={() => {props.redirectTo('login')}}>LOG IN</p> before coming home!</h1>}
+        :  <h1>Please <span onClick={() => {props.redirectTo('login')}}>LOG IN</span> before coming home!</h1>}
         </div>
     );
 }

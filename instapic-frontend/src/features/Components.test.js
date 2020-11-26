@@ -91,8 +91,29 @@ describe('Unit testing each component by rendering', () => {
     });
 });
 
-describe('Unit testing components by checking usage flow', () => {
-    describe('Sign Up workflow', () => {
+describe('Unit && integration testing components by checking usage flow', () => {
+    describe('UnitTest: Navbar', () => {
+        it('Should click buttons', () => {
+            const {container} = render(
+                <Provider store={store}>
+                    <Navbar />
+                </Provider>
+                );
+                
+            const buttonLogin = container.querySelector("#navbar-log-in");
+            fireEvent.click(buttonLogin);
+            expect(buttonLogin.value).toBe('Log in');
+            const buttonSignup = container.querySelector("#navbar-sign-up");
+            fireEvent.click(buttonSignup);
+            expect(buttonSignup.value).toBe('Sign Up');
+            const buttonUpload = container.querySelector("#basic-navbar-nav-upload");
+            fireEvent.click(buttonUpload);
+            expect(buttonUpload.value).toBe('Upload!');
+            expect(container.querySelector("#basic-navbar-brand").textContent).toBe('Reap - InstaPic');
+        });
+    });
+    
+    describe('UnitTest: Sign Up workflow', () => {
         it('Should register a new user', async () => {
             const {container} = render(
                 <Provider store={store}>
@@ -103,12 +124,12 @@ describe('Unit testing components by checking usage flow', () => {
             const inputGroup = container.querySelector("#input-group-signup").childNodes;
             expect(inputGroup.length).toBe(2);
             const input = inputGroup[1];
-            fireEvent.change(input, { target: { value: 'reap' } });
-            expect(input.value).toBe('reap');
+            fireEvent.change(input, { target: { value: 'reap-signup1' } });
+            expect(input.value).toBe('reap-signup1');
             expect(button.textContent).toBe('SIGN UP');
             fireEvent.click(button);
             expect(button.textContent).toBe('Loading...');
-            await new Promise((r) => setTimeout(r, 500));
+            await new Promise((r) => setTimeout(r, 1000));
             expect(button.textContent).toMatch(/^SUCCESS$/);
         });
         it('Should fail to register a new user (duplicate user)', async () => {
@@ -121,77 +142,129 @@ describe('Unit testing components by checking usage flow', () => {
             const inputGroup = container.querySelector("#input-group-signup").childNodes;
             expect(inputGroup.length).toBe(2);
             const input = inputGroup[1];
-            fireEvent.change(input, { target: { value: 'reap' } });
-            expect(input.value).toBe('reap');
+            fireEvent.change(input, { target: { value: 'reap-signup2' } });
+            expect(input.value).toBe('reap-signup2');
             expect(button.textContent).toBe('SIGN UP');
             fireEvent.click(button);
             expect(button.textContent).toBe('Loading...');
-            await new Promise((r) => setTimeout(r, 500));
+            await new Promise((r) => setTimeout(r, 1000));
+            console.log(button.textContent);
+            expect(button.textContent).toMatch(/^SUCCESS$/);
+            // repeat same signup!
+            fireEvent.change(input, { target: { value: 'reap-signup2' } });
+            expect(input.value).toBe('reap-signup2');
+            fireEvent.click(button);
+            expect(button.textContent).toBe('Loading...');
+            await new Promise((r) => setTimeout(r, 1000));
             console.log(button.textContent);
             expect(button.textContent).toMatch(/^FAILED$/);
         });
     });
 
-    describe('Log in workflow', () => {
+    describe('IntegrationTest: Log in workflow', () => {
         it('Should login a user', async () => {
+            // Register
             const {container} = render(
                 <Provider store={store}>
+                    <SignUp />
                     <Login />
                 </Provider>
-                );
+            );
+            const buttonSignup = container.querySelector("#button-signup");
+            const inputGroupSignup = container.querySelector("#input-group-signup").childNodes;
+            expect(inputGroupSignup.length).toBe(2);
+            const inputSignup = inputGroupSignup[1];
+            fireEvent.change(inputSignup, { target: { value: 'reap-login1' } });
+            expect(inputSignup.value).toBe('reap-login1');
+            expect(buttonSignup.textContent).toBe('SIGN UP');
+            fireEvent.click(buttonSignup);
+            expect(buttonSignup.textContent).toBe('Loading...');
+            await new Promise((r) => setTimeout(r, 1000));
+            expect(buttonSignup.textContent).toMatch(/^SUCCESS$/);
+
+            // login
             const button = container.querySelector("#button-login");
             const inputGroup = container.querySelector("#input-group-login").childNodes;
             expect(inputGroup.length).toBe(2);
             const input = inputGroup[1];
-            fireEvent.change(input, { target: { value: 'reap' } });
-            expect(input.value).toBe('reap');
+            fireEvent.change(input, { target: { value: 'reap-login1' } });
+            expect(input.value).toBe('reap-login1');
             expect(button.textContent).toBe('LOG IN');
-            fireEvent.click(button);
-            expect(button.textContent).toBe('Loading...');
-            await new Promise((r) => setTimeout(r, 500));
-            console.log(button.textContent);
-            expect(button.textContent).toMatch(/^SUCCESS$/);
-        });
-        it('Should fail to login a user', async () => {
-            const {container} = render(
-                <Provider store={store}>
-                    <Login />
-                </Provider>
-                );
-            const button = container.querySelector("#button-login");
-            const inputGroup = container.querySelector("#input-group-login").childNodes;
-            expect(inputGroup.length).toBe(2);
-            const input = inputGroup[1];
-            fireEvent.change(input, { target: { value: 'reap-no-exist' } });
-            expect(input.value).toBe('reap-no-exist');
-            expect(button.textContent).toBe('LOG IN');
-            fireEvent.click(button);
-            expect(button.textContent).toBe('Loading...');
-            await new Promise((r) => setTimeout(r, 500));
-            console.log(button.textContent);
-            expect(button.textContent).toMatch(/^SUCCESS$/);
-        });
-    });
-    
-    describe('Upload workflow', () => {
-        it('Should upoad a file and description', async () => {
-            const {container} = render(
-                <Provider store={store}>
-                    <Upload />
-                </Provider>
-                );
-            const button = container.querySelector("#button-upload");
-            const inputFile = container.querySelector("#file-input");
-            const inputDesc = container.querySelector("#description-input");
-            const file = new File(['my-picture.png'], './../test/reap.png', { type: 'image/png' })
-            fireEvent.change(inputFile, { target: { file } });
-            fireEvent.change(inputDesc, { target: { description: 'reap-test' }});
-            expect(inputDesc.value).toBe('reap-test');
-            console.log(inputFile.value);
             fireEvent.click(button);
             expect(button.textContent).toBe('Loading...');
             await new Promise((r) => setTimeout(r, 1000));
             expect(button.textContent).toMatch(/^SUCCESS$/);
+        });
+        it('Should fail to login a user  (user not registered)', async () => {
+            // login non registered user
+            const {container} = render(
+                <Provider store={store}>
+                    <Login />
+                </Provider>
+                );
+            const button = container.querySelector("#button-login");
+            const inputGroup = container.querySelector("#input-group-login").childNodes;
+            expect(inputGroup.length).toBe(2);
+            const input = inputGroup[1];
+            fireEvent.change(input, { target: { value: 'reap-no-exist1' } });
+            expect(input.value).toBe('reap-no-exist1');
+            expect(button.textContent).toBe('LOG IN');
+            fireEvent.click(button);
+            expect(button.textContent).toBe('Loading...');
+            await new Promise((r) => setTimeout(r, 1000));
+            expect(button.textContent).toMatch(/^FAILED$/);
+        });
+    });
+    
+    describe('IntegrationTest: Upload workflow', () => {
+        it('Should fail to upload a file and description (no auth provided)', async () => {
+            // Register
+            const {container} = render(
+                <Provider store={store}>
+                    <SignUp />
+                    <Login />
+                    <Upload />
+                </Provider>
+            );
+            const buttonSignup = container.querySelector("#button-signup");
+            const inputGroupSignup = container.querySelector("#input-group-signup").childNodes;
+            expect(inputGroupSignup.length).toBe(2);
+            const inputSignup = inputGroupSignup[1];
+            fireEvent.change(inputSignup, { target: { value: 'reap-upload1' } });
+            expect(inputSignup.value).toBe('reap-upload1');
+            expect(buttonSignup.textContent).toBe('SIGN UP');
+            fireEvent.click(buttonSignup);
+            expect(buttonSignup.textContent).toBe('Loading...');
+            await new Promise((r) => setTimeout(r, 1000));
+            expect(buttonSignup.textContent).toMatch(/^SUCCESS$/);
+
+            // login
+            const button = container.querySelector("#button-login");
+            const inputGroup = container.querySelector("#input-group-login").childNodes;
+            expect(inputGroup.length).toBe(2);
+            const input = inputGroup[1];
+            fireEvent.change(input, { target: { value: 'reap-upload1' } });
+            expect(input.value).toBe('reap-upload1');
+            expect(button.textContent).toBe('LOG IN');
+            fireEvent.click(button);
+            expect(button.textContent).toBe('Loading...');
+            await new Promise((r) => setTimeout(r, 1000));
+            expect(button.textContent).toMatch(/^SUCCESS$/);
+
+            
+
+            // // upload
+            // const button = container.querySelector("#button-upload");
+            // const inputFile = container.querySelector("#file-input");
+            // const inputDesc = container.querySelector("#description-input");
+            // const file = new File(['my-picture.png'], './../test/reap.png', { type: 'image/png' })
+            // fireEvent.change(inputFile, { target: { file } });
+            // fireEvent.change(inputDesc, { target: { description: 'reap-upload1-description' }});
+            // expect(inputDesc.value).toBe('reap-upload1-description');
+            // fireEvent.click(button);
+            // expect(button.textContent).toBe('Loading...');
+            // await new Promise((r) => setTimeout(r, 1000));
+            // expect(button.textContent).toMatch(/^FAILED$/);
         });
     });
     

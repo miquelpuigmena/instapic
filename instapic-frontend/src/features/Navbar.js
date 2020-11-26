@@ -18,8 +18,8 @@ function MyNavbar(props) {
                     {props.isAuthed
                         ?   (<><Nav.Link style={{color: '#FFFF00'}}>Welcome {props.username}</Nav.Link>
                             <Nav.Link onClick={() => {props.logOut(); props.redirectTo('/login');}}>Log Out</Nav.Link></>)
-                        :   (<><Nav.Link onClick={() => props.redirectTo('/login')}>Log in</Nav.Link>
-                            <Nav.Link onClick={() => props.redirectTo('/signup')}>Sign Up</Nav.Link></>)
+                        :   (<><Nav.Link id="navbar-log-in" onClick={() => props.redirectTo('/login')}>Log in</Nav.Link>
+                            <Nav.Link id="navbar-sign-up" onClick={() => props.redirectTo('/signup')}>Sign Up</Nav.Link></>)
                     }
                 </Nav>
             </Navbar.Collapse>

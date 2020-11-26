@@ -102,8 +102,7 @@ class LoginComponent extends React.Component {
     }
     handleChange = (username) => {
         this.setState({username});
-        if (this.props.status === STATE_FAILED_LOGIN) {
-            // First change after a failed status 
+        if (this.props.status !== STATE_IS_LOADING) {
             this.props.goToIdle();
         }
     };  

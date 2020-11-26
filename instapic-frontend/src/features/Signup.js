@@ -98,8 +98,7 @@ class SignupComponent extends React.Component {
   }
   handleChange = (username) => {
     this.setState({username});
-    if (this.props.status === STATE_FAILED_REGISTER) {
-      // First change after a failed status 
+    if (this.props.status !== STATE_IS_LOADING) {
       this.props.goToIdle();
     }
   };  
@@ -117,14 +116,10 @@ class SignupComponent extends React.Component {
       case STATE_FAILED_REGISTER:
         this.buttonText = 'FAILED';
         break;
-      default:
-        return false;
     }
     return true;
   };
-
   render() {
-
     return (
       <div className="MyForm">
         <Form onSubmit={() => {return false;}}>

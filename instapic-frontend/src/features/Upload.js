@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 // front-end
@@ -105,8 +104,7 @@ class UploadComponent extends React.Component {
   };
   handleDescriptionChange = (description) => {
     this.setState({ description });
-    if (this.props.status === STATE_FAILED_UPLOAD) {
-      // First change after a failed status 
+    if (this.props.status !== STATE_IS_LOADING) {
       this.props.goToIdle();
     }
   };

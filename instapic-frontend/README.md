@@ -1,0 +1,77 @@
+# Front-end
+1. [Presenting the problem](#presenting-the-problem)
+1. [Highlights of the solution](#highlights-of-solution) 
+1. [API](#api)
+1. [Defining ENV vars](#define-env-vars)
+1. [Build me](#build-me)
+1. [Test me](#testing)
+
+## Presenting the problem
+Make a simple app that uses the backend API from the backend challenge to provide a frontend for InstaPic. You can use any frontend framework of your choice (React, Angular, Vue, etc.)
+Feel free to implement the UI your own way. However we'll pay attention to code quality, and how neatly you implement it.
+### Requirements
+- [x] Implement frontend
+- [x] Users can submit post that includes an image and short text description
+- [x] Validation and error handling
+- [x] Automated tests
+
+### Optional
+- [ ] Users can view all posts sorted by time
+- [ ] Users can view posts from a specific user
+- [x] Performance optimization
+- [x] Integrate with Redux and React Router
+
+### Deliverable
+Please share your repo with us and publish on a platform of your choice (Heroku, AWS, etc). Have a README that documents how to run your source.
+- [x] Production URL (Heroku, Netlify, etc.)
+- [x] Source code (Github, Bitbucket, etc.)
+- [x] Documentation on how to run the source code
+- [x] Documentation on your API
+
+## Highlights of Solution
+Developed with **React with Redux**.
+
+Aspects to highlight are:
+- Usage of Router && history for redirecting app flow
+- Redux and React Router
+- Cookies integration for selected functionalities (the ones with auth)
+- Dockerization of service
+
+Ideas I didn't implement because of limited time:
+- Gathering posts uploaded beforehand and filtering
+- Local Storage of store state to persist after refresh
+- Testing end 2 end due to being unable to mock a valid cookie for the API
+- Encryption client-server
+
+## Define env vars
+Backend module expects a `.env` file located inside of `/src` folder. Find an example [here](./src/.env.example)
+
+Defining env vars 
+```
+REACT_APP_WEB_PORT=5000
+REACT_APP_WEB_PATH=/usr/src/instapic/frontend
+REACT_APP_API_HOST=backendinstapic
+REACT_APP_API_PORT=3000
+```
+
+## Build me
+**REMEMEBER, YOU NEED AN ACTIVE POSTGRES DB LISTENING IN PORT AND WITH AUTH DEFINED IN .env FILE**
+
+As linux machine
+```
+# from instapic-frontend folder
+npm build
+```
+
+## Testing
+**REMEMEBER, YOU NEED AN ACTIVE POSTGRES DB LISTENING IN PORT AND WITH AUTH DEFINED IN .env FILE**
+From linux machine
+```
+npm install
+npm test
+```
+
+Output of last coverage
+```
+
+```

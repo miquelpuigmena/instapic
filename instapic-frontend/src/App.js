@@ -11,7 +11,7 @@ import Success from './features/SuccessUpload';
 
 function AppComponent() {
   return (
-    <div className="App">
+    <div id="app" className="App">
       <Auth />
       <MyNavbar />
       <Switch>
