@@ -21,7 +21,7 @@
             "User"
           ],
           "summary": "Persist user in db",
-          "description": "Accepts a username and registers it in db. In exchange it provides an identification cookie to the client.",
+          "description": "Register a new user to service. It creates a username instatnce in db.",
           "operationId": "createUser",
           "consumes": [
             "application/json"
@@ -74,7 +74,7 @@
               "User"
             ],
             "summary": "Logs user to app",
-            "description": "Logs user by linking the `user` parameter to specified `cookie` in request.",
+            "description": "Login a new user to service. It binds an existing user to a cookie and sends back cookie to client.",
             "operationId": "loginUser",
             "consumes": [
               "application/json"
@@ -96,33 +96,6 @@
                       }
                   }
                 }
-              },
-              {
-                  "in": "cookie",
-                  "name": "connect.sid",
-                  "description": "Active cookie that will be linked to user",
-                  "schema": {
-                      "type": "string",
-                      "example": "s%3Apegx9JJdiVGUmPBghXjj6fp_HFp5MI_s.HMvMqdWIW9w5QoO8Rx6CHQ%2FVVxHL%2FlZQkVJu1vkmQDQ;"
-                  }
-              },
-              {
-                  "in": "cookie",
-                  "name": "Path",
-                  "description": "No info",
-                  "schema": {
-                      "type": "string",
-                      "example": "/;"
-                  }
-              },
-              {
-                  "in": "cookie",
-                  "name": "Expires",
-                  "description": "Expire date of cookie",
-                  "schema": {
-                      "type": "string",
-                      "example": "Fri, 20 Nov 2020 15:25:16 GMT;"
-                  }
               }
             ],
             "responses": {
@@ -143,121 +116,61 @@
           "tags": [
             "user"
           ],
-          "summary": "Logs out current logged in user session",
-          "description": "",
-          "operationId": "logoutUser",
+          "summary": "Return message if auth OK",
+          "description": "For testing purposes. Return message if user is logged in.",
+          "operationId": "restricted",
           "produces": [
-            "application/xml",
+            "application/json"
+          ],
+          "consumes": [
             "application/json"
           ],
           "parameters": [],
           "responses": {
-            "default": {
-              "description": "successful operation"
+            "200": {
+              "message": "Login of 'reap' successful"
+            },
+            "401": {
+              "message": "Unauthorized user"
             }
           }
         }
       },
       "/upload": {
-        "get": {
-          "tags": [
-            "user"
-          ],
-          "summary": "Get user by user name",
-          "description": "",
+        "post": {
+          "summary": "Uploads to server",
+          "description": "Uploads an image and description to server if user is logged in. Checks size of file. Checks that mime type of request is either jpg or png. Checks that magic numbers of file are of jpg or png. If all correct, store file in disk and persist post in db.",
           "operationId": "getUserByName",
           "produces": [
-            "application/xml",
             "application/json"
+          ],
+          "consumes": [
+            "Content-type: multipart/form-data"
           ],
           "parameters": [
             {
-              "name": "username",
-              "in": "path",
-              "description": "The name that needs to be fetched. Use user1 for testing. ",
-              "required": true,
-              "type": "string"
+              "field": "description",
+              "file": "file"
             }
           ],
           "responses": {
             "200": {
-              "description": "successful operation",
-              "schema": {
-                "$ref": "#/definitions/User"
-              }
+              "message": "OK"
             },
             "400": {
-              "description": "Invalid username supplied"
-            },
-            "404": {
-              "description": "User not found"
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "user"
-          ],
-          "summary": "Updated user",
-          "description": "This can only be done by the logged in user.",
-          "operationId": "updateUser",
-          "produces": [
-            "application/xml",
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "username",
-              "in": "path",
-              "description": "name that need to be updated",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Updated user object",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          ],
-          "responses": {
+              "message": "Malformed username"
+            },            
             "400": {
-              "description": "Invalid user supplied"
-            },
-            "404": {
-              "description": "User not found"
-            }
-          }
-        },
-        "delete": {
-          "tags": [
-            "user"
-          ],
-          "summary": "Delete user",
-          "description": "This can only be done by the logged in user.",
-          "operationId": "deleteUser",
-          "produces": [
-            "application/xml",
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "name": "username",
-              "in": "path",
-              "description": "The name that needs to be deleted",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
+              "message": "File exceeds max size"
+            },            
             "400": {
-              "description": "Invalid username supplied"
+              "message": "Unexpected field key"
             },
-            "404": {
-              "description": "User not found"
+            "401": {
+              "message": "Unauthorized user"
+            },
+            "500": {
+                "message": "Internal error"
             }
           }
         }

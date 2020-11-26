@@ -22,7 +22,8 @@
     "swagger-ui-express": "^4.1.5"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.6",
+    "nyc": "^15.1.0"
   },
   "scripts": {
     "test": "ENV_MODE=TEST mocha \"./{,!(node_modules)/**/}*.test.js\"",
