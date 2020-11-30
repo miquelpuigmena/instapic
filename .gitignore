@@ -2,3 +2,4 @@
 **/uploads/*.jpeg
 **node_modules/
 .env
+*.pem

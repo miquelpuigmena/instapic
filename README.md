@@ -6,11 +6,11 @@ It's divided by two main groups: backend and frontend. Each group has it's own d
 ## Deployment
 **URL public app front-end**: 
 
-`http://52.59.72.136:5000` or click [here](http://52.59.72.136:5000)
+`http://3.120.243.130:5000` or click [here](http://3.120.243.130:5000)
 
 **URL public API documentation**: 
 
-`http://52.59.72.136:3000/api/v1/api-docs` or click [here](http://52.59.72.136:3000/api/v1/api-docs)
+`http://3.120.243.130:3000/api/v1/api-docs` or click [here](http://3.120.243.130:3000/api/v1/api-docs)
 
 Bash history of AWS EC2 8GM RAM to deploy:
 ```
