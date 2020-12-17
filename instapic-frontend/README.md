@@ -1,14 +1,10 @@
 # Front-end
-1. [Presenting the problem](#presenting-the-problem)
 1. [Highlights of the solution](#highlights-of-solution) 
 1. [API](#api)
 1. [Defining ENV vars](#define-env-vars)
 1. [Build me](#build-me)
 1. [Test me](#testing)
 
-## Presenting the problem
-Make a simple app that uses the backend API from the backend challenge to provide a frontend for InstaPic. You can use any frontend framework of your choice (React, Angular, Vue, etc.)
-Feel free to implement the UI your own way. However we'll pay attention to code quality, and how neatly you implement it.
 ### Requirements
 - [x] Implement frontend
 - [x] Users can submit post that includes an image and short text description

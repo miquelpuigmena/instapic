@@ -1,14 +1,16 @@
-# Reap - InstaPic
-This repository includes the fullstack application InstaPic.
+# Simple Full Stack image server with busboy streams  
+Picture server that securely accepts files of type .png and .jpeg. 
+
+The app is build with React for frontend and node.js for the backend. Build in three seperate Docker containers (backend, database, frontend) and deployed with docker-compose.
 
 It's divided by two main groups: backend and frontend. Each group has it's own documentation [backend-readme](./instaPic-backend/README.md), [frontend-readme](./instapic-frontend/README.md)
 
 ## Deployment
-**URL public app front-end**: 
+**URL public app front-end (not live anymore!)**: 
 
 `http://3.120.243.130:5000` or click [here](http://3.120.243.130:5000)
 
-**URL public API documentation**: 
+**URL public API documentation (not live anymore!)**: 
 
 `http://3.120.243.130:3000/api/v1/api-docs` or click [here](http://3.120.243.130:3000/api/v1/api-docs)
 

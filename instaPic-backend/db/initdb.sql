@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL UNIQUE,
+    hash_password VARCHAR NOT NULL UNIQUE,
     session VARCHAR UNIQUE,
     created_at TIMESTAMP without time zone NOT NULL DEFAULT now()
 );

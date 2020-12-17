@@ -1,14 +1,9 @@
 # Back-end
-1. [Presenting the problem](#presenting-the-problem)
 1. [Highlights of the solution](#highlights-of-solution) 
 1. [API](#api)
 1. [Defining ENV vars](#define-env-vars)
 1. [Build me](#build-me)
 1. [Test me](#testing)
-
-## Presenting the problem
-You will create a mock image sharing website, InstaPic.
-Create a simple REST API where a user can upload a picture. Feel free to use any language or framework that's most comfortable for you.
 
 ### Requirements
 - [x] Implement a RESTful backend API in any stack of your choice (Python, Node, Ruby, Java, etc.)
